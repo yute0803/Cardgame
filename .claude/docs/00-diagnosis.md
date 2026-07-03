@@ -19,10 +19,10 @@
 
 **修法**（已執行）：建立 `CLAUDE.md`（精簡路由）+ `.claude/docs/`（詳細規則）。CLAUDE.md 只放「每個 session 都需要」的硬事實與路由；細節放獨立檔案，需要時才讀，省 token。
 
-### 第 2 名：Repo 裡 5.4 MB 二進位檔 + `prompt.txt` 假文件
+### 第 2 名：Repo 裡近 6 MB 二進位檔 + `prompt.txt` 假文件
 
 **症狀**：
-- `game.exe`、`game_ui.exe`、5 個 `.dll`、`mingw64.exe` 共約 5.4 MB 被版控追蹤。任何 `git add -A` 都會把重編的二進位再 commit 一次；粗心的 Grep/Read 會撞上它們。
+- `game.exe`、`game_ui.exe`、5 個 `.dll`、`mingw64.exe` 共約 6 MB 被版控追蹤（實測 du -ch）。任何 `git add -A` 都會把重編的二進位再 commit 一次；粗心的 Grep/Read 會撞上它們。
 - `prompt.txt`（24 KB）看起來像文件，**其實是 `ui_raylib.c` 某個舊版本的原始碼快照**。弱模型被指示「先讀專案文件」時會整份讀進 context（約 7000 token），更糟的是把裡面的舊程式碼當成現況。
 
 **修法**：

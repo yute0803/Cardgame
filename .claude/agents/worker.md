@@ -1,6 +1,7 @@
 ---
 name: worker
 description: 實作主力。寫程式、重構、批次修改檔案時使用。收到的任務必須含目標、驗收條件、回報格式三段。
+tools: Read, Grep, Glob, Write, Edit, Bash
 model: sonnet
 effort: high
 ---

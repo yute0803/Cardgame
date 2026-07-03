@@ -16,8 +16,8 @@ C 語言撲克 roguelike（類 Balatro）：抽牌、湊牌型得分、過關進
 1. 不要 Read 任何 `.exe` / `.dll`。
 2. `prompt.txt` 是舊版原始碼快照，不是文件：不要讀它、不要引用它的內容當現況。現行程式碼以 `.c` / `.h` 檔為準。
 3. 不要用 `git add -A` 或 `git add .`（會把重編的二進位再 commit 進去）；一律 `git add <具體檔名>`。
-4. 動到 `ui_raylib.c` 的改動不得宣稱「已測試」——本容器測不了 UI。回報時明寫：「UI 未實測，請在 Windows 上跑 game_ui.exe 確認」。
-5. 改任何 `.claude/docs/` 制度檔前，先讀 `.claude/docs/40-maintenance.md`。
+4. 任何會影響 UI 版行為的改動（不只改 `ui_raylib.c`，也包括改它會顯示或使用的邏輯與數值）都不得宣稱「已測試」——本容器測不了 UI。回報時明寫：「UI 未實測，請在 Windows 上跑 game_ui.exe 確認」。
+5. 改 `CLAUDE.md`、`.claude/docs/`、`.claude/agents/` 任何制度檔前，先讀 `.claude/docs/40-maintenance.md`。
 
 ## 檔案地圖
 
@@ -45,5 +45,5 @@ C 語言撲克 roguelike（類 Balatro）：抽牌、湊牌型得分、過關進
 ## 基本工作紀律
 
 - 大量讀取、掃 repo、查網頁、批次改檔 → 派 subagent，主對話只收結論（見 10-delegation.md）。
-- 改完邏輯層程式碼 → 至少做到：gcc 編譯零 error + 跑一次 `/tmp/game_cli` 冒煙測試。
+- 改完邏輯層程式碼 → 至少做到：gcc 編譯零 error + 跑一次 `/tmp/game_cli` 冒煙測試。**這只是最低下限**；完整的「完成」判準（含 verifier 驗收與 push）在 `.claude/docs/20-judgment.md` 第 2 節，宣稱完成前必讀。
 - 回報時區分三種狀態，不要混用：「已實測通過」／「已編譯但未實測」／「無法在本容器驗證」。

@@ -6,7 +6,7 @@
 
 ### 1. 制度只有進了 main 才存在
 
-我的所有產出都在 `claude/fable5-system-design-pjm5px` 分支。**未來 session clone 的是 main——如果這個分支沒被 merge，整套制度對它們而言等於不存在。** 我已在收尾總結裡請使用者 merge。如果你讀到這封信，代表 merge 成功了；但同樣的邏輯適用於你：你對制度檔案的任何改進，停在 claude/* 分支上就是白做。改制度的 PR 要明確提醒使用者合併。
+我的所有產出都在 `claude/fable5-system-design-pjm5px` 分支。**未來 session clone 的是 main——如果這個分支沒被 merge，整套制度對它們而言等於不存在。** 我已在收尾總結裡請使用者 merge。如果你是從 main 的 clone 讀到這封信，代表 merge 成功了；如果你是在 claude/* 分支上讀到，merge 可能還沒發生，先跟使用者確認。同樣的邏輯也適用於你：你對制度檔案的任何改進，停在 claude/* 分支上就是白做。改制度的 PR 要明確提醒使用者合併。
 
 ### 2. 這個 repo 可能落後於使用者的本機
 
