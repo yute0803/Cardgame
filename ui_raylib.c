@@ -489,7 +489,7 @@ int main(void)
                 "5. Reach target score to win\n"
                 "\n"
                 "6. We have a lot of hand type ,such as \n"
-                "  Single 1 point,  Pair 2 points,  Straight 5 points, \n"
+                "  Single 1 point,  Pair 2 points,  Trips 4 points,  Straight 5 points, \n"
                 "  Flush 6 points,  Full House 8 points,\n"
                 "  Four-of-a-Kind 10 points,  Straight Flush 12 points\n",
                 300, 220, 26, (Color){50, 50, 70, 255});
