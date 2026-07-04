@@ -30,6 +30,7 @@ C 語言撲克 roguelike（類 Balatro）：抽牌、湊牌型得分、過關進
 | `main.c` | CLI 版入口（terminal 文字介面） |
 | `ui_raylib.c` | 圖形 UI 版入口（866 行，最大檔；先 Grep 定位再局部 Read） |
 | `tools/winstub/` | Linux 建置 CLI 版用的 windows.h 替身 |
+| `web/cardgame.html` | 手機網頁版（由 C 邏輯逐函式移植；規則改動時需同步更新並重發 artifact） |
 
 ## 路由：什麼情況讀哪份文件
 

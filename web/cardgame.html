@@ -1,0 +1,443 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Cardgame 手機版</title></head><body>
+<style>
+/* ===== Cardgame 手機版 — 夜間牌桌（刻意單一主題：賭桌世界不分明暗） ===== */
+:root{
+  --felt-0:#0b241a; --felt-1:#123527; --felt-2:#1d4a37;
+  --line:rgba(244,238,221,.16);
+  --cream:#f4eedd; --cream-dim:rgba(244,238,221,.62);
+  --ink:#26231a; --gold:#e3b34c; --gold-deep:#8a6420;
+  --red:#c9463d; --red-soft:#e06a5f;
+  --serif:Georgia,'Times New Roman',serif;
+}
+html,body{margin:0;padding:0;background:var(--felt-0);}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Noto Sans TC',system-ui,sans-serif;
+  color:var(--cream);
+  background:radial-gradient(120% 90% at 50% 0%,var(--felt-2) 0%,var(--felt-1) 45%,var(--felt-0) 100%);
+  min-height:100vh; -webkit-tap-highlight-color:transparent;
+}
+#app{max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px calc(env(safe-area-inset-bottom,0px) + 20px);}
+.scr{display:flex;flex-direction:column;gap:14px;min-height:88vh;}
+.scr.center{justify-content:center;text-align:center;align-items:center;}
+h1{font-family:var(--serif);font-size:clamp(2.4rem,11vw,3.4rem);letter-spacing:.12em;margin:0;color:var(--gold);text-wrap:balance;font-weight:700;}
+h2{font-family:var(--serif);font-size:1.6rem;letter-spacing:.08em;margin:0;color:var(--gold);}
+.eyebrow{letter-spacing:.34em;font-size:.72rem;color:var(--cream-dim);margin:0;}
+.sub{color:var(--cream-dim);line-height:1.7;margin:0;}
+.body{line-height:1.8;margin:0;color:var(--cream);}
+.rules{line-height:1.9;padding-left:1.3em;margin:0;color:var(--cream);}
+.rules b{color:var(--gold);}
+.stack{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px;}
+.scr:not(.center) .stack{max-width:none;}
+
+.btn{
+  font:inherit;font-size:1.05rem;padding:14px 18px;border-radius:999px;
+  border:1px solid var(--line);background:rgba(244,238,221,.06);color:var(--cream);
+  cursor:pointer;transition:transform .12s ease,background .12s ease;
+}
+.btn:active{transform:scale(.97);}
+.btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.btn[disabled]{opacity:.35;pointer-events:none;}
+.btn.primary{
+  background:linear-gradient(180deg,#efc25e,var(--gold) 55%,#c9992f);
+  color:var(--ink);border-color:var(--gold-deep);font-weight:700;letter-spacing:.04em;
+}
+.btn.big{font-size:1.15rem;flex:1;}
+.btn.active{border-color:var(--gold);color:var(--gold);}
+.btn.choice{border-radius:16px;text-align:left;font-weight:600;display:flex;flex-direction:column;gap:4px;}
+.btn.choice small{font-weight:400;color:var(--cream-dim);font-size:.85rem;}
+.btn.choice[disabled] small{color:inherit;}
+
+.hud{display:flex;gap:8px;flex-wrap:wrap;}
+.hud.small .pill{font-size:.74rem;padding:5px 10px;}
+.pill{
+  display:flex;gap:6px;align-items:baseline;border:1px solid var(--line);
+  border-radius:999px;padding:6px 12px;font-size:.8rem;color:var(--cream-dim);
+}
+.pill b{color:var(--cream);font-variant-numeric:tabular-nums;font-family:var(--serif);}
+.pill.gold b{color:var(--gold);}
+.score{display:flex;align-items:baseline;gap:10px;font-family:var(--serif);font-variant-numeric:tabular-nums;}
+.score b{font-size:clamp(2.6rem,13vw,3.6rem);line-height:1;color:var(--cream);font-weight:700;}
+.score span{color:var(--cream-dim);font-size:1.2rem;}
+
+.lastplay{border-left:3px solid var(--gold);padding:8px 12px;background:rgba(244,238,221,.05);border-radius:0 10px 10px 0;font-size:.95rem;}
+.lastplay.zero{border-left-color:var(--red);color:var(--cream-dim);}
+.lastplay em{font-style:normal;color:var(--gold);font-family:var(--serif);}
+
+.hand{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.card{
+  aspect-ratio:2/2.9;border-radius:10px;border:1px solid rgba(0,0,0,.35);
+  background:linear-gradient(165deg,#fbf7ea,#efe7d0);color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-family:var(--serif);cursor:pointer;position:relative;
+  box-shadow:0 3px 8px rgba(0,0,0,.35);
+  transition:transform .15s ease,box-shadow .15s ease;padding:0;
+}
+.card .rk{font-size:clamp(1.2rem,6vw,1.7rem);font-weight:700;line-height:1;}
+.card .st{font-size:clamp(1.3rem,6.6vw,1.9rem);line-height:1;}
+.card.red{color:var(--red);}
+.card.sel{transform:translateY(-10px);box-shadow:0 0 0 2.5px var(--gold),0 10px 18px rgba(0,0,0,.45);}
+.card.empty{background:transparent;border:1.5px dashed var(--line);box-shadow:none;cursor:default;}
+.card:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+.actions{display:flex;gap:10px;margin-top:2px;}
+.sheet{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:rgba(11,36,26,.92);}
+.sheet p{margin:0 0 8px;color:var(--cream-dim);font-size:.9rem;}
+.suitrow{display:flex;gap:10px;}
+.suitbtn{
+  flex:1;font-size:1.7rem;padding:10px 0;border-radius:12px;font-family:var(--serif);
+  background:linear-gradient(165deg,#fbf7ea,#efe7d0);color:var(--ink);border:1px solid rgba(0,0,0,.35);cursor:pointer;
+}
+.suitbtn.red{color:var(--red);}
+
+.winword{color:var(--gold);}
+.loseword{color:var(--red-soft);}
+.toast{
+  position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);transform:translateX(-50%);
+  background:var(--cream);color:var(--ink);padding:9px 18px;border-radius:999px;
+  font-size:.9rem;box-shadow:0 6px 18px rgba(0,0,0,.4);animation:pop .18s ease;white-space:nowrap;
+}
+@keyframes pop{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+#selftest{color:var(--cream);font-size:12px;white-space:pre-wrap;}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+<div id="app"></div>
+<script>
+// ============ 撲克邏輯引擎：從 C 原始碼逐函式移植 ============
+// 對照來源：hand_eval.c / score.c / magic.c / cards.c（行為需完全一致，含原版怪癖）
+var SUIT_GLYPH = ['♣','♦','♥','♠']; // 0=♣ 1=♦ 2=♥ 3=♠，同 cards.h 順序
+var HAND = { INVALID:0, SINGLE:1, PAIR:2, TRIPS:3, STRAIGHT:4, FLUSH:5, FULL_HOUSE:6, FOUR:7, SF:8 };
+var HAND_NAME = ['無效牌型','單張','一對','三條','順子','同花','葫蘆','四條','同花順'];
+
+function evaluateHand(cards){                 // hand_eval.c: EvaluateHand
+  var n = cards.length;
+  if (n <= 0 || n > 5) return HAND.INVALID;
+  if (n === 1) return HAND.SINGLE;
+  var t = cards.slice().sort(function(a,b){ return a.rank - b.rank; });
+  var four=false, three=false, pairFlag=false;
+  for (var i=0;i<n;i++){                      // 與 C 版相同的「只往後數」計數法（保留其行為）
+    var c=1;
+    for (var j=i+1;j<n;j++) if (t[j].rank===t[i].rank) c++;
+    if (c===4) four=true; else if (c===3) three=true; else if (c===2) pairFlag=true;
+  }
+  var flush = true;
+  for (i=1;i<n;i++) if (t[i].suit!==t[0].suit){ flush=false; break; }
+  var straight = n>=2;
+  for (i=0;i<n-1;i++) if (t[i+1].rank!==t[i].rank+1){ straight=false; break; }
+  if (n===2) return pairFlag ? HAND.PAIR : HAND.INVALID;
+  if (n===3) return three ? HAND.TRIPS : HAND.INVALID;
+  if (n===4) return four ? HAND.FOUR : HAND.INVALID;
+  if (straight && flush) return HAND.SF;
+  if (four) return HAND.FOUR;
+  if (three && pairFlag) return HAND.FULL_HOUSE;
+  if (flush) return HAND.FLUSH;
+  if (straight) return HAND.STRAIGHT;
+  return HAND.INVALID;
+}
+
+function baseScoreByLevel(level, type){       // score.c: GetBaseScoreByLevel
+  switch (type){
+    case HAND.SINGLE: return level===1 ? 1.0 : (level===2 ? 0.5 : 0.0);
+    case HAND.PAIR:   return level===2 ? 4.0 : 2.0;
+    case HAND.STRAIGHT: return 5.0;
+    case HAND.FLUSH: return 6.0;
+    case HAND.FULL_HOUSE: return 8.0;
+    case HAND.FOUR: return 10.0;
+    case HAND.SF: return 12.0;
+    default: return 0.0;                      // 三條在 C 版計分表缺席 → 0 分（忠實保留）
+  }
+}
+function getScore(level, type, ms){           // score.c: GetScore
+  var base = baseScoreByLevel(level, type);
+  if (base <= 0.0) return 0.0;
+  if (ms && type === HAND.PAIR) base += ms.pairBonus;
+  return base;
+}
+function makeChain(){ return { lastType: HAND.INVALID, chainCount: 0, multiplier: 1.0 }; }
+function isChainSuccess(prev, cur){           // score.c: IsChainSuccess
+  if (cur === HAND.INVALID || cur === HAND.SINGLE) return false;
+  if (prev === HAND.PAIR && cur === HAND.PAIR) return true;
+  if (prev === HAND.PAIR && cur === HAND.FULL_HOUSE) return true;
+  if (prev === HAND.FULL_HOUSE && cur === HAND.FOUR) return true;
+  return false;
+}
+function applyChainMultiplier(cs, current){   // score.c: ApplyChainMultiplier
+  if (!cs) return 1.0;
+  if (cs.lastType === HAND.INVALID){
+    cs.lastType = current; cs.chainCount = 1; cs.multiplier = 1.0;
+    return cs.multiplier;
+  }
+  if (isChainSuccess(cs.lastType, current)){
+    cs.chainCount++; cs.multiplier *= 1.25;
+    if (cs.multiplier > 3.0) cs.multiplier = 3.0;
+  } else {
+    cs.chainCount = 1; cs.multiplier = 1.0;
+  }
+  cs.lastType = current;
+  return cs.multiplier;
+}
+function getScoreChained(level, type, ms, cs){ // score.c: GetScoreChained
+  var base = getScore(level, type, ms);       // 0 分的出牌不觸碰 chain 狀態（同 C 版）
+  if (base <= 0.0) return 0.0;
+  var mul = cs ? applyChainMultiplier(cs, type) : 1.0;
+  return base * mul;
+}
+function goldFromScore(gained){               // magic.c: EarnGoldFromScore
+  var x = gained * 10.0;
+  if (x < 0) x = 0;
+  return Math.floor(x + 0.5);
+}
+function newDeck(){                           // cards.c: CreateDeck（花色優先、每花色 1..13）
+  var d = [];
+  for (var s=0;s<4;s++) for (var r=1;r<=13;r++) d.push({suit:s, rank:r});
+  return d;
+}
+function shuffleDeck(d){                      // cards.c: ShuffleDeck（Fisher–Yates）
+  for (var i=d.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t = d[i]; d[i]=d[j]; d[j]=t;
+  }
+}
+if (typeof module !== 'undefined') module.exports = { HAND, HAND_NAME, SUIT_GLYPH,
+  evaluateHand, baseScoreByLevel, getScore, makeChain, isChainSuccess,
+  applyChainMultiplier, getScoreChained, goldFromScore, newDeck, shuffleDeck };
+
+// ============ 遊戲狀態與畫面（對照 ui_raylib.c 的流程） ============
+var TARGETS = [55.0, 60.0, 65.0];            // ui_raylib.c:12
+var PRICE = { redraw: 50, suit: 80, pair: 300 }; // ui_raylib.c:15-17
+var S = null;
+
+function newGame(){
+  S = { screen:'title', level:1, nextLevel:2, target:TARGETS[0],
+        score:0, round:1, gold:0,
+        pairBonus:0, hasSuit:false, hasRedraw:false, redrawUsed:false,
+        deck:[], hand:[null,null,null,null,null,null,null],
+        sel:{}, chain:makeChain(), suitMode:false, suitPick:-1,
+        lastPlay:null, toast:'' };
+}
+function startLevel(){                        // ui_raylib.c: ResetLevel
+  S.score=0; S.round=1; S.redrawUsed=false; S.sel={}; S.suitMode=false; S.suitPick=-1;
+  S.deck = newDeck(); shuffleDeck(S.deck);
+  S.hand = [null,null,null,null,null,null,null];
+  refill();
+  S.chain = makeChain(); S.lastPlay = null;
+}
+function refill(){                            // cards.c: DrawUntilFull（只補空格、由 0 到 6、從牌堆尾端發）
+  for (var i=0;i<7;i++){
+    if (S.hand[i]===null){
+      if (S.deck.length===0) return;
+      S.hand[i] = S.deck.pop();
+    }
+  }
+}
+function selCount(){ var n=0; for (var k in S.sel) if (S.sel[k]) n++; return n; }
+function tapCard(i){
+  if (S.hand[i]===null) return;
+  if (S.suitMode){ S.suitPick = i; render(); return; }
+  if (!S.sel[i] && selCount()>=5){ showToast('一次最多出 5 張'); return; }
+  S.sel[i] = !S.sel[i]; render();
+}
+function doPlay(){                            // ui_raylib.c:580-624
+  var idx=[], cards=[];
+  for (var i=0;i<7 && idx.length<5;i++){
+    if (S.sel[i] && S.hand[i]!==null){ idx.push(i); cards.push(S.hand[i]); }
+  }
+  if (idx.length===0){ showToast('先點選要出的牌'); return; }
+  var ht = evaluateHand(cards);
+  var g = getScoreChained(S.level, ht, {pairBonus:S.pairBonus}, S.chain);
+  for (i=0;i<idx.length;i++) S.hand[idx[i]] = null;   // RemoveSelectedCardsFromHand
+  refill();
+  if (g > 0){ S.gold += goldFromScore(g); S.score += g; }
+  S.round++; S.sel={};
+  S.lastPlay = { name: HAND_NAME[ht], gain: g,
+                 mult: (g>0 && S.chain.chainCount>1) ? S.chain.multiplier : 0 };
+  checkLevelEnd(); render();
+}
+function doRedraw(){                          // ui_raylib.c:626-634
+  if (!S.hasRedraw || S.redrawUsed) return;
+  for (var i=0;i<7;i++) S.hand[i]=null;
+  refill(); S.redrawUsed = true; S.sel={};
+  checkLevelEnd(); render();
+}
+function toggleSuitMode(){                    // ui_raylib.c:636-640
+  if (!S.hasSuit) return;
+  S.suitMode = !S.suitMode; S.suitPick = -1; render();
+}
+function pickSuit(s){                         // ui_raylib.c:672-701
+  if (S.suitPick>=0 && S.hand[S.suitPick]!==null){
+    S.hand[S.suitPick].suit = s;
+    S.suitMode=false; S.suitPick=-1;
+  }
+  render();
+}
+function checkLevelEnd(){                     // ui_raylib.c:705-720
+  if (S.score >= S.target){
+    if (S.level >= 3){ S.screen='win'; }
+    else { S.screen='magic'; S.nextLevel = S.level+1; }
+    return;
+  }
+  var empty = true;
+  for (var i=0;i<7;i++) if (S.hand[i]!==null){ empty=false; break; }
+  if (S.deck.length<=0 && empty && S.score < S.target) S.screen='lose';
+}
+function chooseMagic(which){                  // magic.c: ApplyMagicCard；選完進商店
+  if (which==='pair') S.pairBonus += 3.0;
+  else S.hasSuit = true;
+  S.screen='shop'; render();
+}
+function buy(item){                           // ui_raylib.c:793-809
+  if (item==='redraw' && !S.hasRedraw && S.gold>=PRICE.redraw){ S.gold-=PRICE.redraw; S.hasRedraw=true; }
+  else if (item==='suit' && !S.hasSuit && S.gold>=PRICE.suit){ S.gold-=PRICE.suit; S.hasSuit=true; }
+  else if (item==='pair' && S.gold>=PRICE.pair){ S.gold-=PRICE.pair; S.pairBonus+=3.0; }
+  render();
+}
+function shopContinue(){                      // ui_raylib.c:810-817
+  S.level = S.nextLevel; S.target = TARGETS[S.level-1];
+  startLevel(); S.screen='playing'; render();
+}
+function playAgain(){ newGame(); render(); }
+function startGame(){ newGame(); startLevel(); S.screen='playing'; render(); }
+function goto_(scr){ S.screen=scr; render(); }
+
+var toastTimer=null;
+function showToast(msg){
+  S.toast=msg; render();
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){ S.toast=''; render(); }, 1600);
+}
+
+// ---------- 畫面 ----------
+function cardHTML(c, i){
+  if (c===null) return '<button class="card empty" disabled aria-label="空格"></button>';
+  var red = (c.suit===1||c.suit===2);
+  var rk = c.rank===1?'A':c.rank===11?'J':c.rank===12?'Q':c.rank===13?'K':String(c.rank);
+  var cls = 'card'+(S.sel[i]?' sel':'')+(S.suitMode&&S.suitPick===i?' sel':'')+(red?' red':'');
+  return '<button class="'+cls+'" onclick="tapCard('+i+')">'+
+    '<span class="rk">'+rk+'</span><span class="st">'+SUIT_GLYPH[c.suit]+'</span></button>';
+}
+function pill(label, val, cls){ return '<div class="pill '+(cls||'')+'"><span>'+label+'</span><b>'+val+'</b></div>'; }
+function render(){
+  var el = document.getElementById('app');
+  var h = '';
+  if (S.screen==='title'){
+    h = '<div class="scr center"><p class="eyebrow">POKER ROGUELIKE</p><h1>CARDGAME</h1>'+
+        '<p class="sub">湊牌型・拿分數・過三關<br>賺 Gold 進商店買魔法卡</p>'+
+        '<div class="stack"><button class="btn primary" onclick="startGame()">開始遊戲</button>'+
+        '<button class="btn" onclick="goto_(\'rules\')">玩法說明</button>'+
+        '<button class="btn" onclick="goto_(\'adv\')">進階規則：連鎖</button></div></div>';
+  } else if (S.screen==='rules'){
+    h = '<div class="scr"><h2>玩法說明</h2><ol class="rules">'+
+        '<li>每回合從 7 張手牌中<b>點選最多 5 張</b>，按「出牌」。</li>'+
+        '<li>湊出撲克牌型就得分：單張 1・一對 2・順子 5・同花 6・葫蘆 8・四條 10・同花順 12（部分牌型分數隨關卡變動）。</li>'+
+        '<li>得分同時獲得 Gold（分數 ×10），過關後可在商店買升級。</li>'+
+        '<li>分數達到目標即過關，共 3 關（55 / 60 / 65 分）。</li>'+
+        '<li>牌堆與手牌都空了仍未達標，就輸了。</li></ol>'+
+        '<button class="btn" onclick="goto_(\'title\')">返回</button></div>';
+  } else if (S.screen==='adv'){
+    h = '<div class="scr"><h2>進階規則：連鎖</h2><p class="body">特定牌型接續出牌會產生<b>連鎖倍率</b>，每接成功一次 ×1.25（上限 ×3）：</p>'+
+        '<ol class="rules"><li>一對 → 一對</li><li>一對 → 葫蘆</li><li>葫蘆 → 四條</li></ol>'+
+        '<p class="body">出單張或無效牌型會重置倍率。</p>'+
+        '<button class="btn" onclick="goto_(\'title\')">返回</button></div>';
+  } else if (S.screen==='playing'){
+    var lp = '';
+    if (S.lastPlay){
+      lp = S.lastPlay.gain>0
+        ? '<div class="lastplay gain">'+S.lastPlay.name+'　+'+(+S.lastPlay.gain.toFixed(4))+
+          (S.lastPlay.mult>0?'　<em>連鎖 ×'+(+S.lastPlay.mult.toFixed(4))+'</em>':'')+'</div>'
+        : '<div class="lastplay zero">'+S.lastPlay.name+'　0 分（牌已消耗）</div>';
+    }
+    var suitSheet = '';
+    if (S.suitMode){
+      suitSheet = '<div class="sheet">'+(S.suitPick<0
+        ? '<p>換花色：先點一張手牌</p>'
+        : '<p>把第 '+(S.suitPick+1)+' 張改成：</p><div class="suitrow">'+
+          '<button class="suitbtn" onclick="pickSuit(0)">♣</button>'+
+          '<button class="suitbtn red" onclick="pickSuit(1)">♦</button>'+
+          '<button class="suitbtn red" onclick="pickSuit(2)">♥</button>'+
+          '<button class="suitbtn" onclick="pickSuit(3)">♠</button></div>')+'</div>';
+    }
+    h = '<div class="scr game"><div class="hud">'+
+        pill('關卡', S.level+' / 3') + pill('回合', S.round) +
+        pill('牌堆', S.deck.length) + pill('GOLD', S.gold, 'gold') + '</div>'+
+        '<div class="score"><b>'+(+S.score.toFixed(4))+'</b><span>/ '+S.target+'</span></div>'+
+        '<div class="hud small">'+
+        pill('對子加成', '+'+S.pairBonus) + pill('換花色', S.hasSuit?'有':'—') +
+        pill('重抽', S.hasRedraw?(S.redrawUsed?'已用':'可用'):'—') + '</div>'+
+        lp +
+        '<div class="hand">'+S.hand.map(cardHTML).join('')+'</div>'+
+        suitSheet +
+        '<div class="actions">'+
+        '<button class="btn primary big" onclick="doPlay()">出牌（'+selCount()+'）</button>'+
+        '<button class="btn" onclick="doRedraw()" '+((S.hasRedraw&&!S.redrawUsed)?'':'disabled')+'>重抽</button>'+
+        '<button class="btn'+(S.suitMode?' active':'')+'" onclick="toggleSuitMode()" '+(S.hasSuit?'':'disabled')+'>換花色</button>'+
+        '</div></div>';
+  } else if (S.screen==='magic'){
+    h = '<div class="scr center"><p class="eyebrow">LEVEL '+S.level+' CLEAR</p><h2>魔法卡・二選一</h2>'+
+        '<p class="sub">永久生效</p><div class="stack">'+
+        '<button class="btn choice" onclick="chooseMagic(\'pair\')">對子加成 +3<small>出「一對」永久多 3 分</small></button>'+
+        '<button class="btn choice" onclick="chooseMagic(\'suit\')">換花色<small>可把手牌換成任意花色</small></button>'+
+        '</div></div>';
+  } else if (S.screen==='shop'){
+    var canR = !S.hasRedraw && S.gold>=PRICE.redraw;
+    var canS = !S.hasSuit && S.gold>=PRICE.suit;
+    var canP = S.gold>=PRICE.pair;
+    h = '<div class="scr center"><h2>商店</h2>'+
+        '<div class="hud">'+pill('GOLD', S.gold, 'gold')+pill('對子加成','+'+S.pairBonus)+'</div><div class="stack">'+
+        '<button class="btn choice" onclick="buy(\'redraw\')" '+(canR?'':'disabled')+'>重抽（每關一次）<small>'+(S.hasRedraw?'已擁有':PRICE.redraw+' G')+'</small></button>'+
+        '<button class="btn choice" onclick="buy(\'suit\')" '+(canS?'':'disabled')+'>換花色<small>'+(S.hasSuit?'已擁有':PRICE.suit+' G')+'</small></button>'+
+        '<button class="btn choice" onclick="buy(\'pair\')" '+(canP?'':'disabled')+'>對子加成 +3<small>'+PRICE.pair+' G・可重複購買</small></button>'+
+        '<button class="btn primary" onclick="shopContinue()">前往 Level '+S.nextLevel+'</button></div></div>';
+  } else if (S.screen==='win'){
+    h = '<div class="scr center"><h1 class="winword">全關通過！</h1>'+
+        '<p class="sub">最終 Gold：'+S.gold+'・對子加成 +'+S.pairBonus+'</p>'+
+        '<button class="btn primary" onclick="playAgain()">再玩一次</button></div>';
+  } else if (S.screen==='lose'){
+    h = '<div class="scr center"><h1 class="loseword">游戲結束</h1>'+
+        '<p class="sub">'+(+S.score.toFixed(4))+' / '+S.target+'・牌用完了</p>'+
+        '<button class="btn primary" onclick="playAgain()">再挑戰</button></div>';
+  }
+  h += S.toast ? '<div class="toast">'+S.toast+'</div>' : '';
+  el.innerHTML = h;
+}
+
+// 手機 viewport（artifact 外層若沒給就補上）
+(function(){
+  if (!document.querySelector('meta[name="viewport"]')){
+    var m=document.createElement('meta'); m.name='viewport';
+    m.content='width=device-width, initial-scale=1, viewport-fit=cover';
+    document.head.appendChild(m);
+  }
+})();
+
+// ---------- 自我測試（?selftest=1）----------
+function runSelfTest(){
+  var out=[], ok=true;
+  function chk(name,cond){ out.push((cond?'PASS':'FAIL')+' '+name); if(!cond) ok=false; }
+  newGame(); startLevel();
+  chk('開局手牌7張', S.hand.every(function(c){return c!==null;}) && S.deck.length===45);
+  // 固定手牌打一對兩次：2 + 2*1.25 = 4.5，Gold 20+25=45
+  S.hand=[{rank:7,suit:0},{rank:7,suit:1},{rank:2,suit:0},{rank:3,suit:0},{rank:4,suit:0},{rank:5,suit:1},{rank:9,suit:2}];
+  S.deck=[{rank:10,suit:0},{rank:11,suit:0},{rank:8,suit:3},{rank:8,suit:2}];
+  S.sel={0:true,1:true}; doPlay();
+  chk('第一對得2分', Math.abs(S.score-2)<1e-9 && S.gold===20);
+  chk('補牌進空格0,1', S.hand[0]!==null && S.hand[1]!==null && S.hand[0].rank===8 && S.hand[1].rank===8);
+  S.sel={}; for (var i=0;i<7;i++) if (S.hand[i]&&S.hand[i].rank===8) S.sel[i]=true;
+  doPlay();
+  chk('連鎖一對 2*1.25=2.5', Math.abs(S.score-4.5)<1e-9 && S.gold===45);
+  chk('回合數=3', S.round===3);
+  var savedGold=S.gold; S.hasRedraw=true; doRedraw(); doRedraw();
+  chk('重抽每關一次', S.redrawUsed===true && S.gold===savedGold);
+  // 過關流程
+  S.score=55; checkLevelEnd(); chk('達標進魔法選擇', S.screen==='magic');
+  chooseMagic('pair'); chk('選對子加成+3', S.pairBonus===3 && S.screen==='shop');
+  S.gold=50; buy('redraw'); chk('商店已擁有不可再買', S.gold===50);
+  S.gold=300; buy('pair'); chk('買對子加成 300G', S.gold===0 && S.pairBonus===6);
+  shopContinue(); chk('進 Level 2 目標60', S.level===2 && S.target===60 && S.screen==='playing' && S.score===0);
+  document.getElementById('app').insertAdjacentHTML('afterbegin',
+    '<pre id="selftest">'+(ok?'SELFTEST_ALL_PASS':'SELFTEST_FAILED')+'\n'+out.join('\n')+'</pre>');
+  return ok;
+}
+
+newGame();
+if (location.search.indexOf('selftest=1')>=0){ runSelfTest(); } else { render(); }
+</script>
+</body></html>
