@@ -32,9 +32,17 @@ int IsFlush(Card *cards, int count)
 int IsStraight(Card *cards, int count)
 {
     if (count < 2) return 0;
+
+    int normal = 1;
     for (int i = 0; i < count - 1; ++i)
+        if (cards[i + 1].rank != cards[i].rank + 1) { normal = 0; break; }
+    if (normal) return 1;
+
+    // A 也可當高牌：排序後為 1,10,11,12,13 這種「A 接到 K」的形狀
+    if (cards[0].rank != 1 || cards[count - 1].rank != 13) return 0;
+    for (int i = 1; i < count - 1; ++i)
         if (cards[i + 1].rank != cards[i].rank + 1) return 0;
-    return 1;
+    return cards[1].rank == 13 - (count - 2);
 }
 
 const char *HandTypeToString(HandType type)
@@ -66,8 +74,8 @@ HandType EvaluateHand(Card *cards, int count)
     int counts[5] = {0};
     for (int i = 0; i < count; ++i)
     {
-        counts[i] = 1;
-        for (int j = i + 1; j < count; ++j)
+        counts[i] = 0;
+        for (int j = 0; j < count; ++j)
             if (temp[j].rank == temp[i].rank) counts[i]++;
     }
 

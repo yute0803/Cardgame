@@ -11,6 +11,7 @@ double GetBaseScoreByLevel(int level, HandType type)
     case HAND_PAIR:
         if (level == 2) return 4.0;
         return 2.0; // level 1 & 3
+    case HAND_TRIPS:          return 4.0;
     case HAND_STRAIGHT:       return 5.0;
     case HAND_FLUSH:          return 6.0;
     case HAND_FULL_HOUSE:     return 8.0;
